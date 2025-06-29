@@ -1,65 +1,126 @@
-*,
-*::before,
-*::after {
-    border: 0;
-    box-sizing: border-box;
-    font: inherit;
-    font-size: 100%;
-    margin: 0;
-    padding: 0;
-    vertical-align: baseline;
+@import "tailwindcss";
+@import 'tailwind-scrollbar-hide/v4';
+
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 100;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Thin.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Thin.woff") format("woff");
 }
 
-article,
-aside,
-details,
-figcaption,
-figure,
-footer,
-header,
-main,
-nav,
-section,
-summary {
-    display: block;
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Light.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Light.woff") format("woff");
 }
 
-ol,
-ul {
-    list-style: none;
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Regular.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Regular.woff") format("woff");
 }
 
-a {
-    text-decoration: none;
-    color: inherit;
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Medium.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Medium.woff") format("woff");
 }
 
-img {
-    display: block;
-    max-width: 100%;
-    height: auto;
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Bold.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Bold.woff") format("woff");
 }
 
-button,
-input,
-select,
-textarea {
-    margin: 0;
-    font-family: inherit;
-    font-size: inherit;
+
+@theme {
+
+    --font-display: 'Spoqa Han Sans Neo', 'Inter', 'Segoe UI', 'Helvetica Neue', 'Noto Sans KR', 'Malgun Gothic', Arial, sans-serif;
+
+    --color-navy: #006699;
+    --color-violet: #663399;
+    --color-green: #009966;
+    --color-red: #ff0033;
+    --color-yellow: #ffcc00;
+    --color-magenta: #993399;
+    --color-lavender: #9999cc;
+
+    --primary: var(--color-navy);
+    --on-primary: var(--neutral-50);
+
+    --secondary: var(--color-violet);
+    --on-secondary: var(--neutral-50);
+
+    --background: var(--neutral-50);
+    --on-background: var(--neutral-950);
+
+    --surface: var(--neutral-300);
+    --on-surface: var(--neutral-900);
+
+    --success: var(--color-green);
+    --on-success: var(--neutral-950);
+
+    --error: var(--color-red);
+    --on-error: var(--neutral-950);
+
+    --warning: var(--color-yellow);
+    --on-warning: var(--neutral-950);
+
+    --info: var(--color-lavender);
+    --on-info: var(--neutral-950);
+
+    --disabled: #cfd8dc;
+    --on-disabled: var(--neutral-500);
+    --border: var(--neutral-200);
+    --focus-ring: #66afe9;
+    --overlay: rgba(0, 0, 0, 0.5);
+
+    --accent: #00ACC1;
+    --highlight: #FFF176;
+    --brand-accent: #C2185B;
+    --muted: var(--neutral-400);
+
+    --neutral-50: #FFFFFF;
+    --neutral-100: #F4F4F4;
+    --neutral-200: #E0E0E0;
+    --neutral-300: #C4C4C4;
+    --neutral-400: #A8A8A8;
+    --neutral-500: #8C8C8C;
+    --neutral-600: #707070;
+    --neutral-700: #545454;
+    --neutral-800: #383838;
+    --neutral-900: #1C1C1C;
+    --neutral-950: #0E0E0E;
 }
 
-button,
-input,
-optgroup,
-select,
-textarea {
-    padding: 0;
-    line-height: inherit;
-    color: inherit;
+@keyframes button-press {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
-button,
-input {
-    overflow: visible;
+.animate-press {
+    animation: button-press 150ms ease-in-out;
 }
