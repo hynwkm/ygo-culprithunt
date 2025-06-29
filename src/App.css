@@ -1,7 +1,56 @@
 @import "tailwindcss";
 @import 'tailwind-scrollbar-hide/v4';
 
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 100;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Thin.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Thin.woff") format("woff");
+}
+
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Light.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Light.woff") format("woff");
+}
+
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Regular.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Regular.woff") format("woff");
+}
+
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Medium.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Medium.woff") format("woff");
+}
+
+@font-face {
+    font-family: Spoqa Han Sans Neo;
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/src/fonts/SpoqaHanSansNeo-Bold.woff2") format("woff2"),
+        url("/src/fonts/SpoqaHanSansNeo-Bold.woff") format("woff");
+}
+
+
 @theme {
+
+    --font-display: 'Spoqa Han Sans Neo', 'Inter', 'Segoe UI', 'Helvetica Neue', 'Noto Sans KR', 'Malgun Gothic', Arial, sans-serif;
+
     --color-navy: #006699;
     --color-violet: #663399;
     --color-green: #009966;
@@ -56,4 +105,22 @@
     --neutral-800: #383838;
     --neutral-900: #1C1C1C;
     --neutral-950: #0E0E0E;
+}
+
+@keyframes button-press {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.animate-press {
+    animation: button-press 150ms ease-in-out;
 }

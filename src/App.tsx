@@ -1,35 +1,17 @@
 import axios from "axios";
 import { type ClassValue, clsx } from "clsx";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import "./App.css";
-import logo from "./assets/icon.svg";
+import HandRow from "./components/HandRow.tsx";
+import Header from "./components/Header.tsx";
+import { CardData } from "./models/cardData.ts";
+import { Deck } from "./models/deck.ts";
 import.meta.env.BASE_URL;
 
-type Deck = {
-    main: number[];
-    extra: number[];
-    side: number[];
-};
-interface CardImage {
-    id: number;
-    image_url: string;
-    image_url_small: string;
-    image_url_cropped: string;
-}
-type CardData = {
-    id: number;
-    name: string;
-    type: string;
-    frameType: string;
-    desc: string;
-    atk: number;
-    def: number;
-    level: number;
-    race: string;
-    attribute: string;
-    card_images: CardImage[];
-};
+const HAND_SIZE = 5;
+const MAX_RETRIES = 2;
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -63,16 +45,11 @@ const parseYDK = (content: string): Deck => {
     return deck;
 };
 
-const shuffleDeck = (deck: number[]) => {
-    let i = deck.length;
-    let j;
-    let temp;
-    while (i > 0) {
-        j = Math.floor(Math.random() * (i + 1));
-        temp = deck[j];
-        deck[j] = deck[i];
-        deck[i] = temp;
-        i--;
+const shuffleDeck = (cards: CardData[]): CardData[] => {
+    const deck = [...cards];
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
     }
     return deck;
 };
@@ -84,6 +61,15 @@ export default function App() {
     const [goodHandCards, setGoodHandCards] = useState<CardData[]>([]);
     const [badHandCards, setBadHandCards] = useState<CardData[]>([]);
     const [suspects, setSuspects] = useState<CardData[]>([]);
+    const [numHands, setNumHands] = useState<number[]>([0, 0, 0]); // numHands, numGoodHands, numBadHands
+    const [numRetries, setNumRetries] = useState<number>(0);
+    const [direction, setDirection] = useState<"left" | "right" | null>(null);
+    const [prevNumBadCards, setPrevNumBadCards] = useState<number>(0);
+    const [roundNum, setRoundNum] = useState<number>(1);
+    const [selectedHand, setSelectedHand] = useState<CardData[] | null>(null);
+    const [clicked, setClicked] = useState<"left" | "right" | null>(null);
+
+    const currentRound = useRef(roundNum);
 
     const handleDeckUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -92,9 +78,21 @@ export default function App() {
         reader.onload = () => {
             const content = reader.result as string;
             const deck = parseYDK(content);
-            setDeck(deck);
+            setDeck({ ...deck });
         };
         reader.readAsText(file);
+    };
+
+    const handleSwipe = (direction: "Left" | "Right", hand: CardData[]) => {
+        const targetHand = hand || selectedHand;
+        if (!targetHand) return;
+        if (direction === "Left") {
+            setBadHandCards((prev) => [...prev, ...targetHand]);
+        } else {
+            setGoodHandCards((prev) => [...prev, ...targetHand]);
+        }
+        setHands((prev) => prev.filter((h) => h !== targetHand));
+        setDirection(null);
     };
 
     useEffect(() => {
@@ -110,7 +108,8 @@ export default function App() {
                         },
                     }
                 );
-                setDeckData(deckData.data);
+                setNumHands([0, 0, 0]);
+                setDeckData(shuffleDeck(deckData.data));
             } catch (error) {
                 console.error(error);
             }
@@ -123,32 +122,84 @@ export default function App() {
 
         const hands: CardData[][] = [];
         for (let i = 0; i < deckData.length; i += 5) {
-            hands.push(deckData.slice(i, i + 5));
+            hands.push(deckData.slice(i, i + HAND_SIZE));
         }
         setHands(hands);
     }, [deckData]);
 
+    useEffect(() => {
+        if (roundNum !== currentRound.current) return;
+        if (badHandCards.length === 0) return;
+        setNumHands((prev) => {
+            const next = [...prev];
+            next[0] = next[0] + 1;
+            next[2] = next[2] + 1;
+            return next;
+        });
+    }, [badHandCards]);
+
+    useEffect(() => {
+        if (roundNum !== currentRound.current) return;
+        if (badHandCards.length === 0) return;
+        setNumHands((prev) => {
+            const next = [...prev];
+            next[0] = next[0] + 1;
+            next[1] = next[1] + 1;
+            return next;
+        });
+    }, [goodHandCards]);
+
+    useEffect(() => {
+        if (hands.length > 0) {
+            setSelectedHand(hands[0]);
+        } else {
+            setSelectedHand(null);
+        }
+    }, [hands]);
+
+    useEffect(() => {
+        if (hands.length > 0) return;
+
+        const badCount = badHandCards.length;
+
+        if (badCount <= HAND_SIZE) {
+            setSuspects(badHandCards);
+            return;
+        }
+        const noProgress: boolean = badCount === prevNumBadCards;
+        if (numRetries >= MAX_RETRIES && noProgress) {
+            setSuspects(badHandCards);
+            return;
+        }
+
+        setRoundNum((prev) => {
+            const next = prev + 1;
+            currentRound.current = next;
+            return next;
+        });
+        setNumHands([0, 0, 0]);
+
+        if (noProgress) {
+            setNumRetries((r) => r + 1);
+        } else {
+            setNumRetries(0);
+        }
+        setPrevNumBadCards(badCount);
+
+        const shuffledDeck = shuffleDeck(badHandCards);
+        setDeckData(shuffledDeck);
+        setBadHandCards([]);
+    }, [hands, badHandCards, numRetries, prevNumBadCards]);
+
     return (
-        <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--on-background)]">
-            <header className="w-full  p-4 gap-2 flex gap-4 bg-[var(--primary)] text-[var(--on-primary)]">
-                <div className="h-14 flex-shrink-0">
-                    <img
-                        src={logo}
-                        alt="logo"
-                        className="h-full w-auto object-contain"
-                    />
-                </div>
-                <div className="flex flex-col justify-center items-start">
-                    <h1 className=" text-2xl font-bold">YGO - Culprit Hunt</h1>
-                    <p>Find the culprit in your deck!</p>
-                </div>
-            </header>
+        <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--on-background)] font-display">
+            <Header />
             <main className="flex-1 overflow-auto p-4 flex flex-col gap-4">
                 <h2 className="text-xl font-semibold">
-                    Upload a deck to start
+                    Upload a {deck ? "new" : ""} deck {!deck ? "to start" : ""}
                 </h2>
                 <div className="bg-[var(--surface)] text-[var(--on-surface)] p-4 flex justify-center">
-                    <label className="cursor-pointer bg-[var(--primary)] text-[var(--on-primary)] px-8 py-4 rounded inline-block">
+                    <label className="cursor-pointer bg-[var(--primary)] text-[var(--on-primary)] px-8 py-4 rounded inline-block font-medium text-lg">
                         UPLOAD DECK
                         <input
                             type="file"
@@ -158,36 +209,111 @@ export default function App() {
                         />
                     </label>
                 </div>
-                {deckData && deckData.length > 0 && (
-                    <div className="gap-4">
-                        <h2 className="text-lg font-semibold">Main Deck:</h2>
-                        <div className="bg-[var(--surface)] p-4 rounded-md shadow-inner ">
-                            <ul className="flex flex-col items-center overflow-y-auto gap-4 bg-[var(--surface)] h-72 scrollbar-hide ">
-                                {hands.map((hand, handIndex) => (
-                                    <li
-                                        className="relative w-10/12 first:w-full flex justify-center gap-1 p-2 rounded-md bg-gradient-to-r from-[var(--error)]/40 via-[var(--neutral-200)] to-[var(--success)]/40"
-                                        key={handIndex}>
-                                        {hand.map((card, cardIndex) => {
+                {suspects.length == 0 && deckData && deckData.length > 0 && (
+                    <>
+                        <div className="gap-4">
+                            <h2 className="text-lg font-semibold flex flex-col">
+                                Round {roundNum}: {numHands[0]} Hands Tested
+                                <div className="gap-2 flex">
+                                    <span className="text-[var(--success)]">
+                                        {numHands[1]} Good
+                                    </span>
+                                    <span className="text-[var(--error)]">
+                                        {numHands[2]} Bad
+                                    </span>
+                                </div>
+                            </h2>
+                            <div className=" p-4 rounded-md shadow-inner ">
+                                <ul className="flex flex-col items-center overflow-y-auto gap-3  h-72 scrollbar-hide ">
+                                    <AnimatePresence>
+                                        {hands.map((hand, handIndex) => {
                                             return (
-                                                <img
-                                                    src={
-                                                        card.card_images[0]
-                                                            .image_url_small
-                                                    }
-                                                    alt={card.name}
-                                                    className="w-1/6 border border-[var(--border)] rounded-sm shadow-sm hover:scale-105 transition-transform duration-150 ease-in-out"
-                                                    key={`${handIndex}-${card.id}-${cardIndex}`}
+                                                <HandRow
+                                                    key={`${handIndex}-${hand
+                                                        .map((card) => card.id)
+                                                        .join("-")}`}
+                                                    hand={hand}
+                                                    handIndex={handIndex}
+                                                    setDirection={setDirection}
+                                                    handleSwipe={handleSwipe}
                                                 />
                                             );
                                         })}
-                                    </li>
-                                ))}
+                                    </AnimatePresence>
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="flex justify-between">
+                            <button
+                                onClick={() => {
+                                    if (selectedHand) {
+                                        setClicked("left");
+                                        handleSwipe("Left", selectedHand);
+                                        setTimeout(() => setClicked(null), 200); // reset animation state
+                                    }
+                                }}
+                                className={cn(
+                                    "transition-all duration-150 cursor-pointer px-4 py-2 rounded inline-block font-medium border border-2",
+                                    clicked === "left" && "animate-press",
+                                    direction === "left"
+                                        ? "bg-[var(--background)] text-[var(--error)] border-[var(--error)]"
+                                        : "bg-[var(--error)]/80 text-[var(--on-primary)] border-[var(--error)] hover:bg-[var(--background)] hover:text-[var(--error)]"
+                                )}>
+                                Bad Hand
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (selectedHand) {
+                                        setClicked("right");
+                                        handleSwipe("Right", selectedHand);
+                                        setTimeout(() => setClicked(null), 200);
+                                    }
+                                }}
+                                className={cn(
+                                    "transition-all duration-150 cursor-pointer px-4 py-2 rounded inline-block font-medium border border-2",
+                                    clicked === "right" && "animate-press",
+                                    direction === "right"
+                                        ? "bg-[var(--background)] text-[var(--success)] border-[var(--success)]"
+                                        : "bg-[var(--success)]/80 text-[var(--on-primary)] border-[var(--success)] hover:bg-[var(--background)] hover:text-[var(--success)]"
+                                )}>
+                                Good Hand
+                            </button>
+                        </div>
+                    </>
+                )}
+
+                {suspects.length !== 0 && deckData && deckData.length > 0 && (
+                    <div className="gap-4">
+                        <h2 className="text-lg font-semibold flex flex-col">
+                            Culprits
+                        </h2>
+                        <div className=" p-4 rounded-md shadow-inner ">
+                            <ul className="flex flex-wrap overflow-y-auto max-h-72 gap-3 scrollbar-hide ">
+                                <AnimatePresence>
+                                    {suspects.map((card, cardIndex) => (
+                                        <motion.img
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                            key={`${card.id}-${cardIndex}`}
+                                            src={
+                                                card.card_images[0]
+                                                    .image_url_small
+                                            }
+                                            alt={card.name}
+                                            className="w-1/6 border border-[var(--border)] shadow-sm transition-transform duration-150 ease-in-out object-contain pointer-events-none select-none"
+                                        />
+                                    ))}
+                                </AnimatePresence>
                             </ul>
                         </div>
                     </div>
                 )}
             </main>
-            {/* <footer>Created by hynwkm</footer> */}
+            <footer className="w-full bg-[var(--surface)] text-[var(--on-surface)] text-center p-2 mt-auto pb-10">
+                Created by hynwkm
+            </footer>
         </div>
     );
 }
