@@ -62,7 +62,7 @@ export default function HandRow({
             dragElastic={DRAG_ELASTIC}
             dragMomentum={false}
             style={{ x: dragX, touchAction: "pan-y" }}
-            className="relative w-10/12 first:w-11/12 flex justify-center gap-1 p-2 rounded-md bg-gradient-to-r from-[var(--error)]/40 via-[var(--neutral-200)] to-[var(--success)]/40 m-1 cursor-pointer">
+            className="relative w-10/12 first:w-11/12 flex justify-center gap-1 p-2 rounded-md bg-gradient-to-r from-[var(--error)]/40 via-[var(--neutral-200)] to-[var(--success)]/40 m-1 cursor-grab active:cursor-grabbing z-1">
             {hand.map((card, cardIndex) => (
                 <img
                     key={`${handIndex}-${card.id}-${cardIndex}`}
