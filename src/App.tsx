@@ -17,6 +17,7 @@ const HAND_SIZE = 5;
 const MAX_RETRIES = 2;
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+console.log(API_URL);
 
 const cn = (...inputs: ClassValue[]): string => {
     return twMerge(clsx(inputs));
