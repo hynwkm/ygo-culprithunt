@@ -17,7 +17,6 @@ const HAND_SIZE = 5;
 const MAX_RETRIES = 2;
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-console.log(API_URL);
 
 const cn = (...inputs: ClassValue[]): string => {
     return twMerge(clsx(inputs));
@@ -82,7 +81,6 @@ export default function App() {
         reader.onload = () => {
             const content = reader.result as string;
             const deck = parseYDK(content);
-            console.log(deck.main.length);
             setDeck({ ...deck });
         };
         reader.readAsText(file);
@@ -93,7 +91,6 @@ export default function App() {
             const response = await fetch("/dark-magician.ydk");
             const content = await response.text();
             const deck = parseYDK(content);
-            console.log(deck.main.length);
             setDeck({ ...deck });
         } catch (err) {
             console.error("Failed to load sample deck:", err);
