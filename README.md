@@ -37,14 +37,16 @@ Quickly spot the “bricks” in your Yu-Gi-Oh! deck by evaluating simulated ope
 
 ```bash
 npm install
-npm run dev
+npm run build
+npm run start
 ```
 
 ### Frontend
 
 ```bash
 npm install
-npm run dev
+npm run build
+npm run preview
 ```
 
 Then open your browser at:  
