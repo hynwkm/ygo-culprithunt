@@ -1,6 +1,6 @@
 # YGO – Culprit Hunt
 
-Quickly spot the “bricks” in your Yu-Gi-Oh! deck by evaluating simulated opening hands.
+Quickly spot the “bricks” in your Yu-Gi-Oh! deck by evaluating simulated opening hands!
 
 ---
 
