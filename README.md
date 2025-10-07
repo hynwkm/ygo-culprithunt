@@ -1,6 +1,6 @@
 # YGO – Culprit Hunt
 
-Quickly spot the “bricks” in your Yu-Gi-Oh! deck by evaluating simulated opening hands.
+Quickly spot the “bricks” in your Yu-Gi-Oh! deck by evaluating simulated opening hands!
 
 ---
 
@@ -56,12 +56,12 @@ Then open your browser at:
 
 ## Usage
 
-1. Click **Upload Deck** and select a `.ydk` file, or pick the **Dark Magician** deck
-2. You’ll see a row of 5 cards (your opening hand)
-3. **Swipe right** (or click Good Hand) if the hand is playable
-4. **Swipe left** (or click Bad Hand) if it’s a brick
-5. “Brick” cards are reshuffled into the deck, and you repeat until only a few culprits remain
-6. That's it! Adjust your deck list based on the identified culprits
+1. Click **Upload Deck** and select a `.ydk` file, or pick the **Dark Magician** deck.
+2. You’ll see a row of 5 cards (your opening hand).
+3. **Swipe right** (or click Good Hand) if the hand is playable.
+4. **Swipe left** (or click Bad Hand) if it’s a brick.
+5. “Brick” cards are reshuffled into the deck, and you repeat until only a few culprits remain.
+6. That's it! Adjust your deck list based on the identified culprits.
 
 ---
 
